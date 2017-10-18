@@ -80,6 +80,9 @@ def update_file_attr(source, dest ):
         mtime = stat.st_mtime
         ctime = stat.st_ctime
         size = stat.st_size
+        mode = stat.st_mode
+        os.chown(dest, uid, gid)
+        os.chmod(dest, mode)
         os.utime(dest, (atime, mtime))
     except Exception:
         logging.error('Error setting metadata for file: ' +dest)
