@@ -10,7 +10,7 @@ usage: redact_logs.py [-h] -f FILES [FILES ...] -k KEYS [KEYS ...] [-l LOG]
 
 Redact lines from input gzip file containing fields passed as parameter
 
-optional arguments:
+<pre>optional arguments:
   -h, --help            show this help message and exit
   -f FILES [FILES ...], --files FILES [FILES ...]
                         <Required> list of files delimited with spaces
@@ -22,4 +22,4 @@ optional arguments:
   --field FIELD         <Optional>String that begins fields to examine
   -d DELIMITER, --delimiter DELIMITER
                         <Optional> Field delimiter inside of fields to examine
-
+</pre>
