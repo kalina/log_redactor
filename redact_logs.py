@@ -13,7 +13,7 @@ Redacts lines from files (likely log) containing the specified fields.
 
 
 def process_files(args):
-    """processes files from the argument removing lines and log the results 
+    """processes files from the argument removing lines and log the results
     """
 
     for f in args.files:
@@ -21,9 +21,9 @@ def process_files(args):
         # log start
         logging.info('Processing file: ' +f)
         start_time = datetime.datetime.now() #.replace(microsecond=0)
-           
+
         new_name = 'redacted_' + f
-        
+
         try:
             # open the original file and set up a gzipped output file
             with gzip.open(f, 'r') as f_in, gzip.open(new_name, 'wb') as f_out:
@@ -31,7 +31,7 @@ def process_files(args):
                 total_lines = 0
                 redacted_lines = 0
                 # start iterating line by line
-                for line in f_in: 
+                for line in f_in:
                     total_lines += 1
                     # look for everything after the delimiter for data
                     fields = line.split(args.field)
@@ -39,7 +39,7 @@ def process_files(args):
                     if len(fields) == 2:
                         # split the field elements and look for keys we ant to redact
                         field_elements = dict(x.split('=') for x in fields[1].split(args.delimiter))
-                        if any(k in field_elements for k in args.keys): 
+                        if any(k in field_elements for k in args.keys):
                             redacted_lines += 1
                             f_out.write('Log entry Redacted\n')
                         else:
@@ -57,19 +57,18 @@ def process_files(args):
                 out_exists = False
             finally:
                 try:
-                  f_in.close()
-                  if out_exists:
-                      f_out.close()
+                    f_in.close()
+                    if out_exists:
+                        f_out.close()
                 except Exception:
                     logging.error("Error closing files")
 
         update_file_attr(f, new_name)
-        # log before going to the next file  
-        end_time = datetime.datetime.now() #.replace(microsecond=0)
+        # log before going to the next file
+        end_time = datetime.datetime.now()
         logging.info('Finished processing: ' +f  +' in ' + str(end_time - start_time) +'.  Redacted ' +str(redacted_lines) +' out of ' +str(total_lines) +' lines.')
-                        
 
-def update_file_attr(source, dest ):
+def update_file_attr(source, dest):
     """attempts to copy ownership and timestamps from one file to another
     """
     try:
@@ -78,8 +77,6 @@ def update_file_attr(source, dest ):
         gid = stat.st_gid
         atime = stat.st_atime
         mtime = stat.st_mtime
-        ctime = stat.st_ctime
-        size = stat.st_size
         mode = stat.st_mode
         os.chown(dest, uid, gid)
         os.chmod(dest, mode)
@@ -98,10 +95,12 @@ def parse_args():
     parser.add_argument('-d', '--delimiter', default=', ', help='<Optional> Field delimiter inside of fields to examine')
     return parser.parse_args()
 
-def main(args):
+def main():
+    """Main entry point.  Starts a logger.
+    """
+    args = parse_args()
     logging.basicConfig(filename=args.log, level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    process_files(args) 
+    process_files(args)
 
 if __name__ == '__main__':
-    arguments = parse_args()
-    main(arguments)
+    main()
