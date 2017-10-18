@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
-from contextlib import contextmanager
 import argparse
 import datetime
 import gzip
-import io
 import logging
 import os
-import sys
 
 """
 Redacts lines from files (likely log) containing the specified fields.
@@ -30,27 +27,30 @@ def process_files(args):
         try:
             # open the original file and set up a gzipped output file
             with gzip.open(f, 'r') as f_in, gzip.open(new_name, 'wb') as f_out:
-                out_exists = True # track if the file exists 
+                out_exists = True # track if the file exists for exception handling
                 total_lines = 0
                 redacted_lines = 0
-                bunch = []
                 # start iterating line by line
                 for line in f_in: 
                     total_lines += 1
-                    # look for everything after fields
+                    # look for everything after the delimiter for data
                     fields = line.split(args.field)
+                    # if present we need to examine further
                     if len(fields) == 2:
+                        # split the field elements and look for keys we ant to redact
                         field_elements = dict(x.split('=') for x in fields[1].split(args.delimiter))
                         if any(k in field_elements for k in args.keys): 
                             redacted_lines += 1
                             f_out.write('Log entry Redacted\n')
                         else:
                             f_out.write(line)
+                    # line doesn't have a delimiter for data
                     else:
                         f_out.write(line)
 
         except Exception:
             logging.error('Error processing file ' +f +' to file ' +new_name)
+            # try to remove the new file if there's an error
             try:
                 f_out.close()
                 os.unlink(f_out)
